@@ -53,6 +53,11 @@ library(lavaan)    # CFA
 library(semTools)  # composite reliability, AVE, HTMT
 library(psych)     # descriptive statistics
 library(knitr)     # tables
+
+# semTools returns reliability and AVE as a list or a data frame depending on its version.
+# These two helpers always return a plain named number per factor.
+cr_vec  <- function(fit) { x <- unlist(compRelSEM(fit)); setNames(as.numeric(x), names(x)) }
+ave_vec <- function(fit) { x <- unlist(AVE(fit));        setNames(as.numeric(x), names(x)) }
 ```
 
 ```{r}
@@ -266,8 +271,8 @@ alpha_oe <- psych::alpha(cfa_data[, c("q9r", "q10r", "q11r", "q12r", "q31", "q32
 tibble(
   construct = c("Employee_Proficiencies", "Operational_Effectiveness"),
   cronbach_alpha = round(c(alpha_ep, alpha_oe), 3),
-  composite_reliability = round(compRelSEM(fit_hyp), 3),
-  AVE = round(AVE(fit_hyp), 3)
+  composite_reliability = round(cr_vec(fit_hyp), 3),
+  AVE = round(ave_vec(fit_hyp), 3)
 ) |> kable()
 ```
 
@@ -286,7 +291,7 @@ tibble(
 phi_hyp <- std_hyp |> filter(op == "~~", lhs != rhs, lhs %in% c("Employee_Proficiencies")) |> pull(est.std)
 tibble(
   construct = c("Employee_Proficiencies", "Operational_Effectiveness"),
-  sqrt_AVE = round(sqrt(AVE(fit_hyp)), 3),
+  sqrt_AVE = round(sqrt(ave_vec(fit_hyp)), 3),
   factor_correlation = round(phi_hyp, 3)
 ) |> kable()
 
@@ -374,10 +379,10 @@ std_alt |> filter(op == "=~") |>
   transmute(factor = lhs, item = rhs, loading = round(est.std, 3), p = round(pvalue, 3)) |>
   kable()
 
-tibble(construct = names(compRelSEM(fit_alt)),
-       composite_reliability = round(compRelSEM(fit_alt), 3),
-       AVE = round(AVE(fit_alt), 3),
-       sqrt_AVE = round(sqrt(AVE(fit_alt)), 3)) |> kable()
+tibble(construct = names(cr_vec(fit_alt)),
+       composite_reliability = round(cr_vec(fit_alt), 3),
+       AVE = round(ave_vec(fit_alt), 3),
+       sqrt_AVE = round(sqrt(ave_vec(fit_alt)), 3)) |> kable()
 
 std_alt |> filter(op == "~~", lhs != rhs, grepl("_", lhs), grepl("_", rhs)) |>
   transmute(factors = paste(lhs, "with", rhs), correlation = round(est.std, 3)) |> kable()
