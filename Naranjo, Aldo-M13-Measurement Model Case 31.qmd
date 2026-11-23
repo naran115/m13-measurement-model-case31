@@ -220,7 +220,7 @@ The model converged normally, used all 128 members, and has 53 degrees of freedo
 #| label: tbl-fit-hyp
 #| tbl-cap: "Fit of the hypothesized two factor model"
 fit_idx <- c("chisq", "df", "pvalue", "cfi", "tli", "rmsea", "rmsea.ci.lower", "rmsea.ci.upper", "srmr")
-fitMeasures(fit_hyp, fit_idx) |> round(3) |> t() |> kable()
+fitMeasures(fit_hyp, fit_idx) |> unclass() |> round(3) |> t() |> kable()
 ```
 
 | Index | Value | Guide | Verdict |
